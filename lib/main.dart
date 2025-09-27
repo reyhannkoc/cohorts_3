@@ -7,10 +7,16 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0)),
+        ),
+      ),
       home: SafeArea(
         child: Scaffold(
           appBar: AppBar(
@@ -18,86 +24,163 @@ class MyApp extends StatelessWidget {
             centerTitle: true,
             backgroundColor: const Color.fromARGB(255, 77, 175, 255),
           ),
-          body: const Center(child: Text("Adınız ve Soyadınız")),
+          body: const SurveyForm(),
         ),
       ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class SurveyForm extends StatefulWidget {
+  const SurveyForm({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<SurveyForm> createState() => _SurveyFormState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class _SurveyFormState extends State<SurveyForm> {
+  bool isAdult = false;
+  bool isSmoker = false;
+  String? selectedGender;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController smokerCountController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+    return ListView(
+      padding: const EdgeInsets.all(20.0),
+      children: [
+        Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+                const Text("Adınız ve Soyadınız"),
+                const SizedBox(height: 40),
+                TextField(controller: nameController),
+                const SizedBox(height: 40),
+                DropdownButton<String>(
+                  items: [
+                    DropdownMenuItem(
+                      value: "Erkek",
+                      child: Row(
+                        children: [
+                          Icon(Icons.male, color: Colors.blue),
+                          const SizedBox(width: 8),
+                          Text("Erkek"),
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: "Kadın",
+                      child: Row(
+                        children: [
+                          Icon(Icons.female, color: Colors.pink),
+                          const SizedBox(width: 8),
+                          Text("Kadın"),
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: "Diğer",
+                      child: Row(
+                        children: [
+                          Icon(Icons.transgender, color: Colors.purple),
+                          const SizedBox(width: 8),
+                          Text("Diğer"),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedGender = value;
+                    });
+                  },
+                  value: selectedGender,
+                  hint: const Text("Cinsiyetiniz"),
+                ),
+                const SizedBox(height: 20),
+                CheckboxListTile(
+                  value: isAdult,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isAdult = newValue ?? false;
+                    });
+                  },
+                  title: const Text("Reşit misiniz?"),
+                ),
+                const SizedBox(height: 20),
+                SwitchListTile(
+                  value: isSmoker,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isSmoker = newValue;
+                    });
+                  },
+                  title: const Text("Sigara kullanıyor musunuz?"),
+                ),
+                if (isSmoker)
+                  TextField(
+                    controller: smokerCountController,
+                    decoration: InputDecoration(
+                      labelText: "Günde kaç tane sigara içiyorsunuz?",
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  child: const Text("Bilgileri Kaydet"),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text("Bilgileriniz"),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Adınız ve Soyadınız: ${nameController.text}"),
+                            Text("Cinsiyetiniz: $selectedGender"),
+                            Text(
+                              "Reşit misiniz?: ${isAdult ? "Evet" : "Hayır"}",
+                            ),
+                            Text(
+                              "Sigara kullanıyor musunuz?: ${isSmoker ? "Evet" : "Hayır"}",
+                            ),
+                            if (isSmoker)
+                              Text(
+                                "Günde ${smokerCountController.text} tane sigara içiyorsunuz. \nBağımlılıkları önlemek için lütfen dikkatli olun!",
+                              ),
+                            if (isSmoker &&
+                                int.tryParse(smokerCountController.text) !=
+                                    null &&
+                                int.parse(smokerCountController.text) > 5)
+                              Text(
+                                "Uyarı: Günde 5'ten fazla sigara içiyorsunuz, lütfen sağlığınıza dikkat edin!",
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text("Kapat"),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ],
     );
   }
 }
